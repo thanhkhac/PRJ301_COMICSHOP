@@ -1,0 +1,127 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.util.*" %>
+<%@page import="model.orderdetail.*"%>
+<%@page import="model.book.*"%>
+<%@page import="model.order.*"%>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+        <link rel="stylesheet" href="assets/Bootstrap_5/css/bootstrap.css"/>
+        <link rel="stylesheet" href="assets/css/general.css"/>
+    </head>
+    <body>
+        <div>
+            <%@include file="includes/header.jsp" %>
+        </div>
+        <c:if test = "${empty sessionScope.USER}">
+            <c:redirect url="login.jsp"/>
+        </c:if>
+        <c:if test = "${not empty sessionScope.USER && sessionScope.USER.role}">
+            <div>
+                <h1 class="text-center mt-3">Chi tiết đơn hàng #<%= request.getParameter("orderID") %></h1>
+            </div>
+            <div class="container mt-3" style="min-width: 1400px; background-color: #FFF; padding-bottom: 140px">
+                <div>
+                    <%  
+                        String xOrderID = request.getParameter("orderID");
+                        int orderID = Integer.parseInt(xOrderID);
+                        ArrayList<OrderDetailDTO> al = new OrderDetailDAO().getOrderDetailsByOrderID(orderID);
+                        int i = 0;
+                        double price = 0;
+                        boolean isValid = true;
+                        OrderDTO orderDTO = new OrderDAO().getOrder(orderID);
+                        for(OrderDetailDTO orderDDTO : al){
+                            BookDTO bookDTO = new BookDAO().getBook(orderDDTO.getBookID());
+                            price += (bookDTO.getPrice() * orderDDTO.getQuantity());
+                    %>
+                    <div>
+                        <!--<form action="SaleController" method="post">-->
+                        <div class="row border justify-content-between">
+                            <div class="col-1 p-2 d-flex justify-content-center align-items-center border">
+                                <h5><%= ++i %></h5>
+                            </div>
+                            <div class="col-1 p-2 d-flex justify-content-center align-items-center">
+                                <img class="w-100 border" src="<%= bookDTO.getThumbnail() %>" alt="">
+                            </div>
+                            <div class="col-3 p-2 d-flex justify-content-center align-items-center">
+                                <a class="text-decoration-none text-dark" href="bookDetails.jsp?bookID=<%= bookDTO.getBookID() %>">
+                                    <h5><%= bookDTO.getTitle() %></h5>
+                                </a>
+                            </div>
+                            <div class="col-1 p-2 d-flex justify-content-center align-items-center">
+                                <h5> <span class="text-danger"><%= bookDTO.getQuantity() %></span> có sẵn</h5>
+                            </div>
+                            <div class="col-1 p-2 d-flex justify-content-center align-items-center">
+                                <h5 class="text-danger"><%= bookDTO.getPrice() %></h5>
+                            </div>
+                            <div class="col-2 p-2 d-flex flex-column justify-content-center align-items-center">
+                                <input class="form-control w-50" type="number" name="quantity<%= bookDTO.getBookID() %>" value= <%= orderDDTO.getQuantity()%> >
+                            </div>
+                            <%
+                                if(orderDTO.getStatus() != 1)
+                                if(bookDTO.getQuantity() < orderDDTO.getQuantity() || bookDTO.getQuantity() <= 0){
+                                isValid = false;
+                            %>
+                            <div class="col-2 p-2 d-flex flex-column justify-content-center align-items-center">
+                                <div class="px-5 py-1 bg-danger text-white">
+                                    Vượt quá số lượng
+                                </div>
+                            </div>
+                            <%
+                                } else {
+                            %>
+                            <div class="col-2 p-2 d-flex flex-column justify-content-center align-items-center">
+                                <div class="px-5 py-1 bg-success text-white">
+                                    Hợp lệ
+                                </div>
+                            </div>
+                            <%
+                                }
+                            %>
+                        </div>
+                    </div>
+                    <%
+                            }
+                    %>
+                </div>
+                <div class="container " style="background-color: #FFF">
+                    <div>
+                        <h4 class="text-center">Tổng tiền: <span class="text-danger"><%= price %>đ</span>  </h4>
+                    </div>
+                    <div class="text-center">
+                        <%
+                            if(orderDTO.getStatus() == 0 && isValid){
+                        %>
+                        <a class="btn btn-danger" href="RejectOrderServlet?orderID=<%=orderID%>">Từ chối</a>
+                        <a class="btn btn-success" href="ApproveOrderServlet?orderID=<%=orderID%>">Chấp nhận</a>
+                        <%
+                            } else if(orderDTO.getStatus() == 1){
+                        %>
+                        <h3>Đơn hàng đã xác nhận</h3>
+<!--                        <a class="btn btn-danger" href="RejectOrderServlet?orderID=<%=orderID%>">Từ chối</a>-->
+                        <%
+                            } else if (orderDTO.getStatus() == 2){
+                        %>
+                        <h3>Đơn hàng đã bị từ chối</h3>
+                        <%
+                            } else {
+                        %>
+                        <h3>Đơn hàng không hợp lệ</h3>
+                        <a class="btn btn-danger" href="RejectOrderServlet?orderID=<%=orderID%>">Từ chối</a>
+                        <%
+                            }
+                        %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c:if>
+    <div>
+        <%@include file="includes/footer.jsp" %>
+    </div>
+
+</body>
+</html>

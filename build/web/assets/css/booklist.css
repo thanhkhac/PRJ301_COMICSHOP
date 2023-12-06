@@ -1,0 +1,33 @@
+.booklist{
+    padding-bottom: 140px;
+}
+
+.thumbnail img:hover{
+    transform: scale(1.2);
+}
+
+.thumbnail img{
+    width: 100%;
+    transition: transform .2s
+}
+
+.book p{
+    margin: 0px;
+}
+
+.book_title {
+    text-decoration: none;
+    color: black;
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+    width: 95%;
+    font-weight: 600;
+}
+
+.button-cart{
+    border: none;
+    background-color: #F11F3B;
+}
+
+
