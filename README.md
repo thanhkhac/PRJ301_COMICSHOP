@@ -6,5 +6,5 @@
 - Database SQL server 2019.
 - Apache Netbeans IDE 13
 
-### Technologies Used
+### Technologies/Frameworks Used
 - Bootstrap
